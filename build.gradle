@@ -1,0 +1,17 @@
+apply plugin: 'java'
+
+dependencies {
+	compile fileTree( dir: "../libs", include: ['JUtils.jar','ModuleAppFramework.jar', 'TerminalWindow.jar'] )
+}
+
+ext {
+	copyLibs = true
+	deployedLibDir = "Apps/run"
+	libDest = "deployed/Tools/libs"
+	jarPathPrefix = "../../libs/"
+	
+	mainClass = "irpi.app.IRPI"
+	iconFile = 'freenas.ico'
+}
+
+apply from: '../gradle/utilapp.gradle'
