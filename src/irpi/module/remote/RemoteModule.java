@@ -6,7 +6,10 @@ import java.util.List;
 import gui.windowmanager.WindowManager;
 import irpi.module.remote.data.RemoteMapData;
 import irpi.module.remote.data.RemoteMonitor;
+import irpi.module.remote.macro.MacroData;
+import irpi.module.remote.ui.MacroManager;
 import irpi.module.remote.ui.RemoteTree;
+import irpi.module.remote.ui.SentMonitor;
 import module.AppModule;
 import module.spi.SPIDataMonitorProvider;
 import module.spi.SPIMonitorDataProvider;
@@ -23,13 +26,18 @@ public class RemoteModule extends AppModule implements SPIDataMonitorProvider, S
 	
 	public static final String REMOTE_MONITOR = RemoteMonitor.class.getName();
 	
+	public static final String MACRO_DATA = MacroData.class.getName();
+	
 	private RemoteMapData rd;
+	
+	private MacroData md;
 	
 	private RemoteMonitor rm;
 
 	@Override
 	public void init() {
 		rd = new RemoteMapData();
+		md = new MacroData();
 	}
 
 	@Override
@@ -39,11 +47,13 @@ public class RemoteModule extends AppModule implements SPIDataMonitorProvider, S
 	@Override
 	public void loadWindowDefinitions() {
 		WindowManager.addWindowDefinition( new RemoteTree() );
+		WindowManager.addWindowDefinition( new SentMonitor() );
+		WindowManager.addWindowDefinition( new MacroManager() );
 	}
 
 	@Override
 	public List<MonitorData> getMonitorData() {
-		return Arrays.asList( rd );
+		return Arrays.asList( rd, md );
 	}
 
 	@Override

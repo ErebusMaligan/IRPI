@@ -11,9 +11,13 @@ import irpi.module.remote.RemoteConstants;
 import process.ProcessManager;
 import process.io.ProcessStreamSiphon;
 import state.monitor.MonitorData;
+import xml.XMLExpansion;
+import xml.XMLValues;
 
-public class RemoteMapData extends MonitorData implements ProcessStreamSiphon {
+public class RemoteMapData extends MonitorData implements ProcessStreamSiphon, XMLValues {
 
+	public static enum DATA_TYPES { CODES, LAST_CODE };
+	
 	private Map<String, Map<String, String>> mapping = new HashMap<>();
 	
 	private boolean remoteBlock = false;
@@ -24,11 +28,13 @@ public class RemoteMapData extends MonitorData implements ProcessStreamSiphon {
 	
 	private boolean rawBlock = false;
 	
-	private String rawCode = null;
+	private String rawCode = "";
 	
 	private String rawName = null;
 	
 	private String remoteName;
+	
+	private String[] lastSentCode = new String[ 3 ];
 	
 	public RemoteMapData() {
 		skimmers.put( RemoteConstants.PRINT_FILE, line -> {
@@ -48,11 +54,11 @@ public class RemoteMapData extends MonitorData implements ProcessStreamSiphon {
 				}
 				if ( l.startsWith( "end raw_codes" ) ) {
 					rawCodesBlock = false;
-					dataChanged();
+					dataChanged( DATA_TYPES.CODES );
 				}
 				if ( l.startsWith( "end codes" ) ) {
 					codesBlock = false;
-					dataChanged();
+					dataChanged( DATA_TYPES.CODES );
 				}
 				if ( remoteBlock && !codesBlock && !rawCodesBlock && l.startsWith( "name" ) ) {
 					remoteName = l.split( " " )[ 1 ];
@@ -70,28 +76,35 @@ public class RemoteMapData extends MonitorData implements ProcessStreamSiphon {
 							mapping.get( remoteName ).put( rawName, rawCode.trim() );
 							rawBlock = false;
 							rawName = null;
-						} else if ( rawBlock && l.startsWith( "name" ) ) {
+							rawCode = "";
+						} else if ( !rawBlock && l.startsWith( "name" ) ) {
 							rawName = l.split( " " )[ 1 ];
+							rawBlock = true;
 						} else if ( rawBlock && !l.startsWith( "name" ) ) {
 							for ( String s : l.split( " " ) ) {
 								rawCode += s + " ";
 							}
-						}
-						if ( !rawBlock && line.isEmpty() ) {//these 2 are not the same and need to be in this order
-							rawBlock = true;
 						}
 					}
 				}
 			}
 		} );
 		
-		skimmers.put( RemoteConstants.IRSEND, line -> {} ); //this doesn't have any feedback, but needs to have a skimmer assigned to the command
+		skimmers.put( RemoteConstants.IRSEND, line -> {
+			if ( line.contains( "SEND_ONCE" ) ) {
+				String[] codes = line.split( "SEND_ONCE" )[ 1 ].trim().split( " " );
+				lastSentCode[ 0 ] = codes[ 0 ];
+				lastSentCode[ 1 ] = codes[ 1 ];
+				lastSentCode[ 2 ] = mapping.get( codes[ 0 ] ).get( codes[1 ] );
+				dataChanged( DATA_TYPES.LAST_CODE );
+			}
+		} ); //this doesn't have any feedback, but needs to have a skimmer assigned to the command
 		ProcessManager.getInstance().registerSiphon( IRPIConstants.SSH_MASTER_PROCESS_NAME, this );
 	}
 	
-	private void dataChanged() {
+	private void dataChanged( DATA_TYPES type ) {
 		setChanged();
-		notifyObservers( null );
+		notifyObservers( type );
 	}
 	
 	public List<String> getRemoteNames() {
@@ -104,10 +117,112 @@ public class RemoteMapData extends MonitorData implements ProcessStreamSiphon {
 		return Collections.unmodifiableMap( mapping.get( name ) );
 	}
 	
+	public String[] getLastSentCode() {
+		return lastSentCode;
+	}
+	
 	@Override
 	public void notifyProcessEnded( String arg0 ) {}
 
 	@Override
 	public void notifyProcessStarted( String arg0 ) {}
 
+	@Override
+	public List<XMLValues> getChildNodes() {
+		List<XMLValues> ret = new ArrayList<>();
+		for ( String device : mapping.keySet() ) {
+			ret.add( new DeviceXMLValues( device, mapping.get( device ) ) ); 
+		}
+		return ret;
+	}
+
+	@Override
+	public void loadParamsFromXMLValues( XMLExpansion e ) {
+		e = e.getChild( IRPIConstants.DEVICES );
+		e.getChildren( IRPIConstants.DEVICE ).forEach( c -> new DeviceXMLValues( null, null ).loadParamsFromXMLValues( c ) );
+		dataChanged( DATA_TYPES.CODES );
+	}
+
+	@Override
+	public Map<String, Map<String, String[]>> saveParamsAsXML() {
+		Map<String, Map<String, String[]>> ret = new HashMap<>();
+		ret.put( IRPIConstants.DEVICES, null );
+		return ret;
+	}
+	
+	
+	
+	private class DeviceXMLValues implements XMLValues {
+		
+		private String name;
+		
+		private Map<String, String> codes;
+		
+		public DeviceXMLValues( String name, Map<String, String> codes ) {
+			this.name = name;
+			this.codes = codes;
+		}
+		
+		@Override
+		public List<XMLValues> getChildNodes() {
+			List<XMLValues> ret = new ArrayList<>();
+			for ( String code : codes.keySet() ) {
+				ret.add( new CodeXMLValues( name, code, codes.get( code ) ) ); 
+			}
+			return ret;
+		}
+		
+		@Override
+		public void loadParamsFromXMLValues( XMLExpansion e ) {
+			name = e.get( IRPIConstants.DEVICE_NAME );
+			mapping.put( name, new HashMap<>() );
+			e.getChildren( IRPIConstants.CODE ).forEach( c -> new CodeXMLValues( name, null, null ).loadParamsFromXMLValues( c ) );
+		}
+		
+		@Override
+		public Map<String, Map<String, String[]>> saveParamsAsXML() {
+			Map<String, Map<String, String[]>> ret = new HashMap<>();
+			Map<String, String[]> v = new HashMap<>();
+			v.put( IRPIConstants.DEVICE_NAME, new String[] { name } );
+			ret.put( IRPIConstants.DEVICE, v );
+			return ret;
+		}
+	}
+	
+	private class CodeXMLValues implements XMLValues {
+		
+		private String device;
+		
+		private String name;
+		
+		private String value;
+		
+		public CodeXMLValues( String device, String name, String value ) {
+			this.device = device;
+			this.name = name;
+			this.value = value;
+		}
+		
+		@Override
+		public List<XMLValues> getChildNodes() {
+			return null;
+		}
+		
+		@Override
+		public void loadParamsFromXMLValues( XMLExpansion e ) {
+			name = e.get( IRPIConstants.CODE_NAME );
+			value = e.get( IRPIConstants.CODE_VALUE );
+			mapping.get( device ).put( name, value );
+		}
+		
+		@Override
+		public Map<String, Map<String, String[]>> saveParamsAsXML() {
+			Map<String, Map<String, String[]>> ret = new HashMap<>();
+			Map<String, String[]> v = new HashMap<>();
+			v.put( IRPIConstants.CODE_VALUE, new String[] { value } );
+			v.put( IRPIConstants.CODE_NAME, new String[] { name } );
+			ret.put( IRPIConstants.CODE, v );
+			return ret;
+		}
+	}
 }

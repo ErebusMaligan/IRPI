@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -60,6 +61,7 @@ public class IRMenuBar extends GenericMenuBar implements Observer {
 		LAFUtils.applyThemedUI( this, ThemeConstants.BACKGROUND, ThemeConstants.FOREGROUND );
 
 		UIUtils.setColors( this );
+		this.setBorder( BorderFactory.createLineBorder( ThemeConstants.FOREGROUND ) );
 	}
 
 	private void createSSHMenu() {
@@ -130,7 +132,11 @@ public class IRMenuBar extends GenericMenuBar implements Observer {
 		createWindowItem( SSHConstants.WD_SSH );
 		menu.add( new JSeparator() );
 		createWindowItem( RemoteConstants.WD_REMOTE_TREE );
-
+		menu.add( new JSeparator() );
+		createWindowItem( RemoteConstants.WD_SEND_MONITOR );
+		win.add( windows );
+		menu.add( new JSeparator() );
+		createWindowItem( RemoteConstants.WD_MACRO_MANAGER );
 		win.add( windows );
 
 		menu = win;
