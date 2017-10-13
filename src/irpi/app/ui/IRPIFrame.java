@@ -3,6 +3,7 @@ package irpi.app.ui;
 import java.awt.BorderLayout;
 import java.awt.GraphicsDevice;
 
+import irpi.app.IRPI;
 import irpi.app.ui.menu.IRMenuBar;
 import state.provider.ApplicationProvider;
 import statics.UIUtils;
@@ -24,7 +25,7 @@ public class IRPIFrame extends AbstractApplicationFrame {
 	public void construct() {
 		setLayout( new BorderLayout() );
 		add( provider.getTabManager().getTabPane(), BorderLayout.CENTER );
-		add( new IRMenuBar( provider ), BorderLayout.NORTH );
+		add( new IRMenuBar( (IRPI)provider ), BorderLayout.NORTH );
 	}
 
 	@Override

@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import gui.windowmanager.WindowManager;
-import irpi.module.remote.data.RemoteMapData;
-import irpi.module.remote.data.RemoteMonitor;
-import irpi.module.remote.macro.MacroData;
+import irpi.module.remote.data.device.RemoteMapData;
+import irpi.module.remote.data.device.RemoteMonitor;
+import irpi.module.remote.data.macro.MacroData;
 import irpi.module.remote.ui.MacroManager;
 import irpi.module.remote.ui.RemoteTree;
 import irpi.module.remote.ui.SentMonitor;

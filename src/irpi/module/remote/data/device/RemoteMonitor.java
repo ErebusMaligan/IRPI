@@ -1,8 +1,8 @@
-package irpi.module.remote.data;
+package irpi.module.remote.data.device;
 
 import irpi.module.remote.RemoteConstants;
-import irpi.module.remote.macro.Macro;
-import irpi.module.remote.macro.MacroCommand;
+import irpi.module.remote.data.macro.Macro;
+import irpi.module.remote.data.macro.MacroCommand;
 import ssh.SSHSession;
 import state.control.BroadcastManager;
 import state.monitor.AbstractMonitor;

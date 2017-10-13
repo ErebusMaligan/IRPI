@@ -15,7 +15,7 @@ import javax.swing.JTextArea;
 import gui.windowmanager.WindowDefinition;
 import irpi.module.remote.RemoteConstants;
 import irpi.module.remote.RemoteModule;
-import irpi.module.remote.data.RemoteMapData;
+import irpi.module.remote.data.device.RemoteMapData;
 import state.provider.ApplicationProvider;
 import statics.UIUtils;
 

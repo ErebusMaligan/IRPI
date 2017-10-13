@@ -1,7 +1,11 @@
 package irpi.module.remote.ui;
 
 import java.awt.BorderLayout;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -9,17 +13,19 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import gui.layout.WrapLayout;
 import gui.windowmanager.WindowDefinition;
 import irpi.module.remote.RemoteConstants;
 import irpi.module.remote.RemoteModule;
-import irpi.module.remote.data.RemoteMapData;
-import irpi.module.remote.data.RemoteMapData.DATA_TYPES;
-import irpi.module.remote.data.RemoteMonitor;
-import irpi.module.remote.macro.MacroData;
+import irpi.module.remote.data.device.RemoteMapData;
+import irpi.module.remote.data.device.RemoteMapData.DATA_TYPES;
+import irpi.module.remote.data.device.RemoteMonitor;
+import irpi.module.remote.data.macro.MacroData;
 import state.provider.ApplicationProvider;
 import statics.GU;
 import statics.UIUtils;
@@ -39,7 +45,6 @@ public class RemoteTree implements WindowDefinition, Observer {
 	@Override
 	public JComponent getCenterComponent( Object provider ) {
 		this.provider = (ApplicationProvider)provider;
-		JPanel ret = new JPanel( new BorderLayout() );
 		
 		JPanel parse = new JPanel();
 		parse.setLayout( new BoxLayout( parse, BoxLayout.X_AXIS ) );
@@ -57,27 +62,27 @@ public class RemoteTree implements WindowDefinition, Observer {
 		north.add( parse );
 		GU.spacer( north );
 		center.add( north, BorderLayout.NORTH );
-		split.addTab( "Macros", macro );
+		JScrollPane mScroll = new JScrollPane( macro );
+		UIUtils.setJScrollPane( mScroll );
+		mScroll.getVerticalScrollBar().setUnitIncrement( 15 );
+		split.addTab( "Macros", mScroll );
 		split.addTab( "Devices", center );
 		center.add( remoteTab, BorderLayout.CENTER );
-		ret.add( new RemoteTreeMenuBar( this.provider ), BorderLayout.NORTH );
-		ret.add( split, BorderLayout.CENTER );
 		
 		UIUtils.setJButton( b );
-		UIUtils.setColorsRecursive( ret );
+		UIUtils.setColorsRecursive( split );
 		Arrays.asList( remoteTab, split ).forEach( c -> UIUtils.setTabUI( c ) );
 		Arrays.asList( RemoteModule.REMOTE_DATA, RemoteModule.MACRO_DATA ).forEach( s -> this.provider.getMonitorManager().getDataByName( s ).addObserver( this ) );
-		return ret;
+		return split;
 	}
 
 	private void loadMacros() {
 		macro.removeAll();
 		MacroData md =  (MacroData)this.provider.getMonitorManager().getDataByName( RemoteModule.MACRO_DATA );
 		md.getMacros().forEach( m -> {
-			JButton b = GU.createButton( m.toString(), e -> ((RemoteMonitor)this.provider.getMonitorManager().getMonitorByName( RemoteModule.REMOTE_MONITOR ) ).sendMacro( m ) );
-			UIUtils.setJButton( b );
-			macro.add( b );
+			macro.add( IRPIUIUtils.createButton( m.toString(), e -> ((RemoteMonitor)this.provider.getMonitorManager().getMonitorByName( RemoteModule.REMOTE_MONITOR ) ).sendMacro( m ) ) );
 		} );
+		macro.revalidate();
 	}
 	
 	@Override
@@ -103,12 +108,14 @@ public class RemoteTree implements WindowDefinition, Observer {
 					JPanel remote = new JPanel();
 					UIUtils.setColors( remote );
 					remote.setLayout( new WrapLayout() );
-					data.getRemoteCodes( s ).forEach( (k, v) -> {
-						JButton b = GU.createButton( k, e -> ((RemoteMonitor)this.provider.getMonitorManager().getMonitorByName( RemoteModule.REMOTE_MONITOR ) ).sendCommand( s, k ) );
-						UIUtils.setJButton( b );
-						remote.add( b );
-					} );
-					remoteTab.addTab( s, remote );
+					Map<String, String> codes = data.getRemoteCodes( s );
+					List<String> l = new ArrayList<>( codes.keySet() );
+					Collections.sort( l );
+					l.forEach( k -> remote.add( IRPIUIUtils.createButton( k, e -> ((RemoteMonitor)this.provider.getMonitorManager().getMonitorByName( RemoteModule.REMOTE_MONITOR ) ).sendCommand( s, k ) ) ) );
+					JScrollPane scroll = new JScrollPane( remote );
+					UIUtils.setJScrollPane( scroll );
+					scroll.getVerticalScrollBar().setUnitIncrement( 15 );
+					SwingUtilities.invokeLater( () -> remoteTab.addTab( s, scroll ) );
 				} );
 			}
 		}

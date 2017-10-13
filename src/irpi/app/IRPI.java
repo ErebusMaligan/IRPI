@@ -4,6 +4,7 @@ import static irpi.app.constants.IRPIConstants.SSH_MASTER_PROCESS_NAME;
 import static irpi.app.constants.IRPIConstants.XSETTINGS;
 
 import java.awt.Color;
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -14,9 +15,14 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import gui.windowmanager.WindowManagerConstants;
+import irpi.app.constants.IRPIConstants;
 import irpi.app.constants.IRPIConstantsDocumentHandler;
 import irpi.app.ui.IRPIFrame;
 import irpi.module.remote.RemoteModule;
+import irpi.module.remote.data.device.RemoteMapXMLDocumentHandler;
+import irpi.module.remote.data.macro.MacroData;
+import irpi.module.remote.data.macro.MacroXMLDocumentHandler;
+import irpi.module.remote.state.DefaultFileSettings;
 import module.AppModule;
 import module.spi.SPIDataMonitorProvider;
 import module.spi.SPIRealTimeMonitorProvider;
@@ -46,6 +52,17 @@ public class IRPI extends ApplicationProvider implements XMLValues {
 	private SSHSettings sshS;
 	
 	private BasicColorSettings colorS;
+	
+	private DefaultFileSettings defFileS;
+	
+	@Override
+	protected void handleAutoStart() {
+		super.handleAutoStart();
+		if ( ProviderConstants.AUTO ) {
+			new MacroXMLDocumentHandler( ( (MacroData)getMonitorManager().getDataByName( RemoteModule.MACRO_DATA ) ) ).loadDoc( new File( defFileS.getMacro() ) );
+			new RemoteMapXMLDocumentHandler( (XMLValues)getMonitorManager().getDataByName( RemoteModule.REMOTE_DATA ) ).loadDoc( new File( defFileS.getDevice() ) );
+		}
+	}
 	
 	@Override 
 	protected void initOtherSPI() {
@@ -80,6 +97,7 @@ public class IRPI extends ApplicationProvider implements XMLValues {
 		winS = new WindowSettings();
 		sshS = new SSHSettings();
 		colorS = new BasicColorSettings();
+		defFileS = new DefaultFileSettings();
 		
 		doc = new IRPIConstantsDocumentHandler( this );
 	}
@@ -96,7 +114,7 @@ public class IRPI extends ApplicationProvider implements XMLValues {
 
 	@Override
 	public List<XMLValues> getChildNodes() { 
-		return Arrays.asList( new XMLValues[] { debugS, autoS, winS, sshS, colorS, tab } ); 
+		return Arrays.asList( new XMLValues[] { debugS, autoS, winS, sshS, colorS, tab, defFileS } ); 
 	}
 	
 	@Override
@@ -123,6 +141,9 @@ public class IRPI extends ApplicationProvider implements XMLValues {
 		if ( e.getChild( WindowManagerConstants.XTABS ) != null ) {
 			tab.loadParamsFromXMLValues( e.getChild( WindowManagerConstants.XTABS ) );
 		}
+		if ( e.getChild( IRPIConstants.XDEFAULT_FILES ) != null ) {
+			defFileS.loadParamsFromXMLValues( e.getChild( IRPIConstants.XDEFAULT_FILES ) );
+		}
 	}
 
 	@Override
@@ -147,5 +168,9 @@ public class IRPI extends ApplicationProvider implements XMLValues {
 			e.printStackTrace();
 		}
 		new IRPI();
+	}
+
+	public DefaultFileSettings getDefFileS() {
+		return defFileS;
 	}
 }

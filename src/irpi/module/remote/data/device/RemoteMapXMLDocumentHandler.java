@@ -1,4 +1,4 @@
-package irpi.module.remote.data;
+package irpi.module.remote.data.device;
 
 import org.w3c.dom.Document;
 

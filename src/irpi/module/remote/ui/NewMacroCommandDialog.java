@@ -10,11 +10,11 @@ import javax.swing.JRadioButton;
 
 import gui.dialog.OKCancelDialog;
 import irpi.module.remote.RemoteModule;
-import irpi.module.remote.data.RemoteMapData;
-import irpi.module.remote.macro.Macro;
-import irpi.module.remote.macro.MacroChild;
-import irpi.module.remote.macro.MacroCommand;
-import irpi.module.remote.macro.MacroData;
+import irpi.module.remote.data.device.RemoteMapData;
+import irpi.module.remote.data.macro.Macro;
+import irpi.module.remote.data.macro.MacroChild;
+import irpi.module.remote.data.macro.MacroCommand;
+import irpi.module.remote.data.macro.MacroData;
 import state.provider.ApplicationProvider;
 import statics.GU;
 import statics.UIUtils;

@@ -23,9 +23,9 @@ import gui.dialog.OKCancelDialog;
 import gui.windowmanager.WindowDefinition;
 import irpi.module.remote.RemoteConstants;
 import irpi.module.remote.RemoteModule;
-import irpi.module.remote.macro.Macro;
-import irpi.module.remote.macro.MacroChild;
-import irpi.module.remote.macro.MacroData;
+import irpi.module.remote.data.macro.Macro;
+import irpi.module.remote.data.macro.MacroChild;
+import irpi.module.remote.data.macro.MacroData;
 import state.provider.ApplicationProvider;
 import statics.GU;
 import statics.LAFUtils;
@@ -58,10 +58,7 @@ public class MacroManager implements WindowDefinition, Observer {
 		Arrays.asList( RemoteModule.REMOTE_DATA, RemoteModule.MACRO_DATA ).forEach( s -> this.provider.getMonitorManager().getDataByName( s ).addObserver( this ) );
 		LAFUtils.applySimpleUI( macros, UIUtils.BACKGROUND, UIUtils.FOREGROUND );
 		UIUtils.setColorsRecursive( main );
-		JPanel center = new JPanel( new BorderLayout() );
-		center.add( new MacroMenuBar( this.provider ), BorderLayout.NORTH );
-		center.add( main, BorderLayout.CENTER );
-		return center;
+		return main;
 	}
 	
 	private JPanel getNewMacroPanel() {
@@ -78,6 +75,7 @@ public class MacroManager implements WindowDefinition, Observer {
 			}
 		} );
 		GU.hp( ret, new JLabel( "New Macro Name: ", JLabel.RIGHT ), macroName, b );
+		GU.spacer( ret );
 		UIUtils.setJButton( b );
 		return ret;
 	}
@@ -86,6 +84,7 @@ public class MacroManager implements WindowDefinition, Observer {
 		JPanel ret = new JPanel();
 		ret.setLayout( new BoxLayout( ret, BoxLayout.Y_AXIS ) );
 		GU.hp( ret, new JLabel( "Macro: ", JLabel.RIGHT ), macros );
+		GU.spacer( ret );
 		macros.addActionListener( e -> reloadCommands() );
 		JPanel com = new JPanel( new BorderLayout() );
 		com.add( commands, BorderLayout.CENTER );
@@ -116,6 +115,7 @@ public class MacroManager implements WindowDefinition, Observer {
 			}
 		} );
 		Arrays.asList( add, remove ).forEach( b -> UIUtils.setJButton( b ) );
+		GU.spacer( ret );
 		GU.hp( ret, add, remove );
 		return ret;
 	}

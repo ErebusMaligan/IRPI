@@ -1,4 +1,4 @@
-package irpi.module.remote.macro;
+package irpi.module.remote.data.macro;
 
 import java.util.List;
 

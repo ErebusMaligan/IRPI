@@ -1,4 +1,4 @@
-package irpi.module.remote.macro;
+package irpi.module.remote.data.macro;
 
 import org.w3c.dom.Document;
 

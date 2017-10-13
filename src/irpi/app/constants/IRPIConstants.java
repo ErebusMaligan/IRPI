@@ -6,6 +6,8 @@ public class IRPIConstants {
 	
 	public static final String XSETTINGS = "SETTINGS";
 	
+	public static final String XDEFAULT_FILES = "DEFAULT_FILES";
+	
 	//menubar
 	public static final String MB_SSH = "SSH";
 	
@@ -48,6 +50,8 @@ public class IRPIConstants {
 	public static final String MB_DEVICE_SAVE = "Save Devices";
 	
 	public static final String MB_DEVICE_LOAD = "Load Devices";
+	
+	public static final String MB_DEFAULT_FILES = "Default Files";
 	
 	
 	

@@ -1,6 +1,25 @@
 package irpi.app.ui.menu;
 
-import static irpi.app.constants.IRPIConstants.*;
+import static irpi.app.constants.IRPIConstants.MB_AUTO_START;
+import static irpi.app.constants.IRPIConstants.MB_COLOR;
+import static irpi.app.constants.IRPIConstants.MB_CREATE_TAB;
+import static irpi.app.constants.IRPIConstants.MB_DEVICE_LOAD;
+import static irpi.app.constants.IRPIConstants.MB_DEVICE_SAVE;
+import static irpi.app.constants.IRPIConstants.MB_FILE;
+import static irpi.app.constants.IRPIConstants.MB_FRAME;
+import static irpi.app.constants.IRPIConstants.MB_MACRO_LOAD;
+import static irpi.app.constants.IRPIConstants.MB_MACRO_SAVE;
+import static irpi.app.constants.IRPIConstants.MB_REMOVE_TAB;
+import static irpi.app.constants.IRPIConstants.MB_SETTINGS;
+import static irpi.app.constants.IRPIConstants.MB_SSH;
+import static irpi.app.constants.IRPIConstants.MB_SSH_CONNECT;
+import static irpi.app.constants.IRPIConstants.MB_SSH_DISCONNECT;
+import static irpi.app.constants.IRPIConstants.MB_SYS_MONITOR;
+import static irpi.app.constants.IRPIConstants.MB_SYS_MONITOR_START;
+import static irpi.app.constants.IRPIConstants.MB_SYS_MONITOR_STOP;
+import static irpi.app.constants.IRPIConstants.MB_TABS;
+import static irpi.app.constants.IRPIConstants.MB_WINDOWS;
+import static irpi.app.constants.IRPIConstants.MB_WINDOW_MANAGEMENT;
 
 import java.awt.Dimension;
 import java.util.Observable;
@@ -17,10 +36,16 @@ import gui.dialog.OKCancelDialog;
 import gui.menubar.GenericActionListener;
 import gui.menubar.GenericMenuBar;
 import gui.menubar.GenericMenuBarAction;
+import irpi.app.IRPI;
+import irpi.app.constants.IRPIConstants;
 import irpi.module.remote.RemoteConstants;
+import irpi.module.remote.RemoteModule;
+import irpi.module.remote.data.device.RemoteMapXMLDocumentHandler;
+import irpi.module.remote.data.macro.MacroData;
+import irpi.module.remote.data.macro.MacroXMLDocumentHandler;
+import irpi.module.remote.ui.DefaultFileLocationsDialog;
 import ssh.SSHConstants;
 import ssh.SSHSession;
-import state.provider.ApplicationProvider;
 import state.provider.ProviderConstants;
 import statics.LAFUtils;
 import statics.UIUtils;
@@ -29,6 +54,7 @@ import ui.ssh.SSHDialog;
 import ui.theme.BasicColorDialog;
 import ui.theme.ThemeConstants;
 import ui.window.CreateTabDialog;
+import xml.XMLValues;
 
 /**
  * @author Daniel J. Rivers
@@ -40,19 +66,19 @@ public class IRMenuBar extends GenericMenuBar implements Observer {
 
 	private static final long serialVersionUID = 1L;
 
-	private ApplicationProvider state;
+	private IRPI state;
 
-	public IRMenuBar( ApplicationProvider state ) {
+	public IRMenuBar( IRPI state ) {
 		this.state = state;
 		for ( SSHSession ssh : state.getSSHManager().getSSHSessions() ) {
 			ssh.addObserver( this );
 		}
+		createFileMenu();
 		createSSHMenu();
 		createSystemMonitorMenu();
 		createSettingsMenu();
 		createWindowsMenu();
 		this.add( Box.createGlue() );
-		//		createLogMenu();
 		update( null, false );
 
 		this.setUI( new BasicMenuBarUI() );
@@ -64,6 +90,17 @@ public class IRMenuBar extends GenericMenuBar implements Observer {
 		this.setBorder( BorderFactory.createLineBorder( ThemeConstants.FOREGROUND ) );
 	}
 
+	private void createFileMenu() {
+		menu = new JMenu( MB_FILE );
+		UIUtils.setColors( menu );
+		createItem( MB_DEVICE_SAVE, o -> new RemoteMapXMLDocumentHandler( (XMLValues)state.getMonitorManager().getDataByName( RemoteModule.REMOTE_DATA ) ).createDoc() );
+		createItem( MB_DEVICE_LOAD, o -> new RemoteMapXMLDocumentHandler( (XMLValues)state.getMonitorManager().getDataByName( RemoteModule.REMOTE_DATA ) ).loadDoc( null ) );
+		menu.add( new JSeparator() );
+		createItem( MB_MACRO_SAVE, o -> new MacroXMLDocumentHandler( ( (MacroData)state.getMonitorManager().getDataByName( RemoteModule.MACRO_DATA ) ) ).createDoc() );
+		createItem( MB_MACRO_LOAD, o -> new MacroXMLDocumentHandler( ( (MacroData)state.getMonitorManager().getDataByName( RemoteModule.MACRO_DATA ) ) ).loadDoc( null ) );
+		this.add( menu );
+	}
+	
 	private void createSSHMenu() {
 		menu = new JMenu( MB_SSH );
 		UIUtils.setColors( menu );
@@ -97,6 +134,8 @@ public class IRMenuBar extends GenericMenuBar implements Observer {
 			ProviderConstants.AUTO = !ProviderConstants.AUTO;
 			state.writeSettings();
 		}, ProviderConstants.AUTO );
+		menu.add( new JSeparator() );
+		createItem( IRPIConstants.MB_DEFAULT_FILES, o -> new DefaultFileLocationsDialog( state ).setVisible( true ) );
 		menu.add( new JSeparator() );
 		createItem( MB_FRAME, o -> state.getFrame().saveWindowSettings( state ) );
 		createItem( MB_SSH, o -> new SSHDialog( state.getFrame(), state ).setVisible( true ) );
@@ -142,13 +181,6 @@ public class IRMenuBar extends GenericMenuBar implements Observer {
 		menu = win;
 		this.add( menu );
 	}
-
-	//	private void createLogMenu() {
-	//		menu = new JMenu( MB_LOGS );
-	//		UIUtils.setColors( menu );
-	//		createItem( MB_LOGS_WARNING, o -> state.getWarningDialog().setVisible( true ) );
-	//		this.add( menu );
-	//	}
 
 	private void createWindowItem( String command ) {
 		createItem( command, o -> state.getTabManager().instantiateWindow( command, null ) );
