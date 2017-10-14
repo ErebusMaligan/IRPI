@@ -1,7 +1,10 @@
 package irpi.module.remote.ui;
 
 import java.awt.BorderLayout;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
@@ -15,6 +18,7 @@ import irpi.module.remote.data.macro.Macro;
 import irpi.module.remote.data.macro.MacroChild;
 import irpi.module.remote.data.macro.MacroCommand;
 import irpi.module.remote.data.macro.MacroData;
+import irpi.module.remote.data.macro.MacroReference;
 import state.provider.ApplicationProvider;
 import statics.GU;
 import statics.UIUtils;
@@ -39,14 +43,18 @@ public class NewMacroCommandDialog extends OKCancelDialog {
 		super( provider.getFrame(), "Add To Macro...", true );
 		this.setLayout( new BorderLayout() );
 		RemoteMapData rmd = ( (RemoteMapData)provider.getMonitorManager().getDataByName( RemoteModule.REMOTE_DATA ) );
-		rmd.getRemoteNames().forEach( s -> devices.addItem( s ) );
+		List<String> deviceList = new ArrayList<>( rmd.getRemoteNames() );
+		Collections.sort( deviceList );
+		deviceList.forEach( s -> devices.addItem( s ) );
 		MacroData md = ( (MacroData)provider.getMonitorManager().getDataByName( RemoteModule.MACRO_DATA ) );
 		md.getMacros().forEach( m -> macros.addItem( m ) );
 		
 		devices.addActionListener( e -> {
 			if ( devices.getItemCount() != 0 ) {
 				commands.removeAllItems();
-				rmd.getRemoteCodes( devices.getItemAt( devices.getSelectedIndex() ) ).keySet().forEach( s -> commands.addItem( s ) );
+				List<String> commandList = new ArrayList<>( rmd.getRemoteCodes( devices.getItemAt( devices.getSelectedIndex() ) ).keySet() );
+				Collections.sort( commandList );
+				commandList.forEach( s -> commands.addItem( s ) );
 			}
 		} );
 		command.addActionListener( e -> {
@@ -65,6 +73,9 @@ public class NewMacroCommandDialog extends OKCancelDialog {
 				Arrays.asList( devices, commands ).forEach( c -> c.setEnabled( !sel ) );
 			}
 		} );
+		if ( devices.getItemCount() != 0 ) {
+			devices.setSelectedIndex( 0 );
+		}
 		JPanel center = new JPanel();
 		center.setLayout( new BoxLayout( center, BoxLayout.Y_AXIS ) );
 		GU.hp( center, macro, macros );
@@ -73,7 +84,9 @@ public class NewMacroCommandDialog extends OKCancelDialog {
 		GU.spacer( this );
 		this.add( center, BorderLayout.CENTER );
 		this.add( getButtonPanel(), BorderLayout.SOUTH );
+		macros.setEnabled( false );
 		UIUtils.setColorsRecursive( this );
+		Arrays.asList( ok, cancel ).forEach( b -> UIUtils.setJButton( b ) );
 		this.pack();
 	}
 	
@@ -81,7 +94,7 @@ public class NewMacroCommandDialog extends OKCancelDialog {
 	public void ok() {
 		if ( macro.isSelected() ) {
 			if ( macros.getSelectedIndex() != -1 ) {
-				child = macros.getItemAt( macros.getSelectedIndex() );
+				child = new MacroReference( macros.getItemAt( macros.getSelectedIndex() ).getName() );
 			}
 		} else {
 			if ( devices.getSelectedIndex() != -1 && commands.getSelectedIndex() != -1 ) {

@@ -2,6 +2,8 @@ package irpi.module.remote.ui;
 
 import java.awt.BorderLayout;
 import java.awt.MouseInfo;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
@@ -45,6 +47,8 @@ public class MacroManager implements WindowDefinition, Observer {
 	
 	private JPanel main;
 	
+	private JTextField macroCategory = new JTextField();
+	
 	{
 		commands.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
 	}
@@ -85,6 +89,16 @@ public class MacroManager implements WindowDefinition, Observer {
 		ret.setLayout( new BoxLayout( ret, BoxLayout.Y_AXIS ) );
 		GU.hp( ret, new JLabel( "Macro: ", JLabel.RIGHT ), macros );
 		GU.spacer( ret );
+		GU.hp( ret, new JLabel( "Category: " ), macroCategory );
+		macroCategory.addKeyListener( new KeyAdapter() {
+			@Override
+			public void keyReleased( KeyEvent e ) {
+				if ( macros.getSelectedIndex() != -1 ) {
+					( (Macro)macros.getSelectedItem() ).setCategory( macroCategory.getText() );
+					
+				}
+			}
+		} );
 		macros.addActionListener( e -> reloadCommands() );
 		JPanel com = new JPanel( new BorderLayout() );
 		com.add( commands, BorderLayout.CENTER );
@@ -122,9 +136,11 @@ public class MacroManager implements WindowDefinition, Observer {
 	
 	private void reloadCommands() {
 		if ( macros.getSelectedIndex() != -1 ) {
+			Macro selected = ( (Macro)macros.getSelectedItem() );
 			model.removeAllElements();
-			( (Macro)macros.getSelectedItem() ).getMacroChildren().forEach( c -> model.addElement( c ) );
+			selected.getMacroChildren().forEach( c -> model.addElement( c ) );
 			commands.revalidate();
+			macroCategory.setText( selected.getCategory() );
 		}
 	}
 

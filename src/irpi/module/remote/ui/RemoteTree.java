@@ -4,10 +4,12 @@ import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.TreeSet;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -16,7 +18,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 import gui.layout.WrapLayout;
 import gui.windowmanager.WindowDefinition;
@@ -25,6 +26,7 @@ import irpi.module.remote.RemoteModule;
 import irpi.module.remote.data.device.RemoteMapData;
 import irpi.module.remote.data.device.RemoteMapData.DATA_TYPES;
 import irpi.module.remote.data.device.RemoteMonitor;
+import irpi.module.remote.data.macro.Macro;
 import irpi.module.remote.data.macro.MacroData;
 import state.provider.ApplicationProvider;
 import statics.GU;
@@ -40,7 +42,7 @@ public class RemoteTree implements WindowDefinition, Observer {
 	
 	private JTabbedPane split = new JTabbedPane();
 	
-	private JPanel macro = new JPanel();
+	private JTabbedPane macros = new JTabbedPane();
 	
 	@Override
 	public JComponent getCenterComponent( Object provider ) {
@@ -57,32 +59,45 @@ public class RemoteTree implements WindowDefinition, Observer {
 		
 		JPanel center = new JPanel( new BorderLayout() );
 		JPanel north = new JPanel();
-		macro.setLayout( new WrapLayout() );
+		JPanel macro = new JPanel( new BorderLayout() );
+		macro.add( macros, BorderLayout.CENTER );
 		north.setLayout( new BoxLayout( north, BoxLayout.Y_AXIS ) );
 		north.add( parse );
 		GU.spacer( north );
 		center.add( north, BorderLayout.NORTH );
-		JScrollPane mScroll = new JScrollPane( macro );
-		UIUtils.setJScrollPane( mScroll );
-		mScroll.getVerticalScrollBar().setUnitIncrement( 15 );
-		split.addTab( "Macros", mScroll );
+		
+		split.addTab( "Macros", macro );
 		split.addTab( "Devices", center );
 		center.add( remoteTab, BorderLayout.CENTER );
 		
 		UIUtils.setJButton( b );
 		UIUtils.setColorsRecursive( split );
-		Arrays.asList( remoteTab, split ).forEach( c -> UIUtils.setTabUI( c ) );
+		Arrays.asList( remoteTab, split, macros ).forEach( c -> UIUtils.setTabUI( c ) );
 		Arrays.asList( RemoteModule.REMOTE_DATA, RemoteModule.MACRO_DATA ).forEach( s -> this.provider.getMonitorManager().getDataByName( s ).addObserver( this ) );
 		return split;
 	}
 
 	private void loadMacros() {
-		macro.removeAll();
+		macros.removeAll();
 		MacroData md =  (MacroData)this.provider.getMonitorManager().getDataByName( RemoteModule.MACRO_DATA );
+		Map<Macro, String> mm = new HashMap<>();
+		md.getMacros().forEach( m -> mm.put( m, m.getCategory() ) );
+		TreeSet<String> cat = new TreeSet<>( mm.values() );
+		Map<String, JPanel> panels = new HashMap<>();
+		for ( String s : cat ) {
+			JPanel macro = new JPanel();
+			macro.setLayout( new WrapLayout() );
+			JScrollPane mScroll = new JScrollPane( macro );
+			UIUtils.setJScrollPane( mScroll );
+			mScroll.getVerticalScrollBar().setUnitIncrement( 15 );
+			UIUtils.setColors( macro );
+			panels.put( s, macro );
+			macros.addTab( s, macro );
+		}
 		md.getMacros().forEach( m -> {
-			macro.add( IRPIUIUtils.createButton( m.toString(), e -> ((RemoteMonitor)this.provider.getMonitorManager().getMonitorByName( RemoteModule.REMOTE_MONITOR ) ).sendMacro( m ) ) );
+			panels.get( m.getCategory() ).add( IRPIUIUtils.createButton( m.toString(), e -> ((RemoteMonitor)this.provider.getMonitorManager().getMonitorByName( RemoteModule.REMOTE_MONITOR ) ).sendMacro( m ) ) );
 		} );
-		macro.revalidate();
+		macros.revalidate();
 	}
 	
 	@Override
@@ -115,7 +130,7 @@ public class RemoteTree implements WindowDefinition, Observer {
 					JScrollPane scroll = new JScrollPane( remote );
 					UIUtils.setJScrollPane( scroll );
 					scroll.getVerticalScrollBar().setUnitIncrement( 15 );
-					SwingUtilities.invokeLater( () -> remoteTab.addTab( s, scroll ) );
+					remoteTab.addTab( s, scroll );
 				} );
 			}
 		}

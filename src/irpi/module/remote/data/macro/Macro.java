@@ -11,9 +11,13 @@ import xml.XMLValues;
 
 public class Macro implements MacroChild, XMLValues, Comparable<Macro> {
 
+	private static final String DEFAULT_CAT = "DEFAULT";
+	
 	private List<MacroChild> children = new ArrayList<>();
 
 	private String name;
+	
+	private String category = DEFAULT_CAT;
 
 	public Macro( String name ) {
 		this.name = name;
@@ -40,8 +44,12 @@ public class Macro implements MacroChild, XMLValues, Comparable<Macro> {
 	@Override
 	public void loadParamsFromXMLValues( XMLExpansion e ) {
 		name = e.get( IRPIConstants.MACRO_NAME );
+		category = e.get( IRPIConstants.MACRO_CATEGORY );
+		if ( category == null ) {
+			category = DEFAULT_CAT;
+		}
 		for ( XMLExpansion child : e.getChildren() ) {
-			MacroChild c = child.getName().equals( IRPIConstants.MACRO ) ? new Macro( null ) : new MacroCommand( null, null );
+			MacroChild c = child.getName().equals( IRPIConstants.MACRO_COMMAND ) ? new MacroCommand( null, null ) : new MacroReference( null );
 			c.loadParamsFromXMLValues( child );
 			children.add( c );
 		}
@@ -52,12 +60,21 @@ public class Macro implements MacroChild, XMLValues, Comparable<Macro> {
 		Map<String, Map<String, String[]>> ret = new HashMap<>();
 		Map<String, String[]> v = new HashMap<>();
 		v.put( IRPIConstants.MACRO_NAME, new String[] { name } );
+		v.put( IRPIConstants.MACRO_CATEGORY, new String[] { category } );
 		ret.put( IRPIConstants.MACRO, v );
 		return ret;
 	}
 	
 	public String getName() {
 		return name;
+	}
+	
+	public void setCategory( String category ) {
+		this.category = category;
+	}
+	
+	public String getCategory() {
+		return category;
 	}
 	
 	@Override

@@ -1,8 +1,11 @@
 package irpi.module.remote.data.device;
 
 import irpi.module.remote.RemoteConstants;
+import irpi.module.remote.RemoteModule;
 import irpi.module.remote.data.macro.Macro;
 import irpi.module.remote.data.macro.MacroCommand;
+import irpi.module.remote.data.macro.MacroData;
+import irpi.module.remote.data.macro.MacroReference;
 import ssh.SSHSession;
 import state.control.BroadcastManager;
 import state.monitor.AbstractMonitor;
@@ -13,6 +16,7 @@ public class RemoteMonitor extends AbstractMonitor {
 
 	public RemoteMonitor( MonitorManager manager, BroadcastManager broadcast, MonitorData data, SSHSession ssh ) {
 		super( manager, broadcast, data, ssh, 1000l );
+		this.queueDelay = 500l;
 		this.printLoopInfoEvery = 1;
 		log = false;
 	}
@@ -26,12 +30,14 @@ public class RemoteMonitor extends AbstractMonitor {
 	}
 	
 	public void sendMacro( Macro m ) {
+//		System.out.println( "Sending Macro... " + m.getName() );
 		m.getMacroChildren().forEach( c -> {
 			if ( c instanceof MacroCommand ) {
 				MacroCommand mc = (MacroCommand)c;
 				sendCommand( mc.getDevice(), mc.getCode() );
 			} else {
-				sendMacro( (Macro)c );
+				MacroReference mr = (MacroReference)c;
+				sendMacro( ( (MacroData)manager.getDataByName( RemoteModule.MACRO_DATA ) ).getMacro( mr.getName() ) );
 			}
 		} );
 	}

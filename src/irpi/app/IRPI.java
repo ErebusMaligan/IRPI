@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -81,7 +82,7 @@ public class IRPI extends ApplicationProvider implements XMLValues {
 
 	@Override
 	protected void init() {
-//		WindowConstants.APP_ICON = new ImageIcon( ApplicationConstants.class.getResource( "freenas.png" ) );
+		WindowConstants.APP_ICON = new ImageIcon( getClass().getResource( "ir_icon.png" ) );
 		WindowConstants.FRAME_TITLE = "IRPI";
 		
 		ThemeConstants.BACKGROUND = Color.BLACK;

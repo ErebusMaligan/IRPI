@@ -15,6 +15,10 @@ public class MacroData extends MonitorData implements XMLValues {
 
 	private Map<String, Macro> macros = new HashMap<>();
 	
+	public Macro getMacro( String name ) {
+		return macros.get( name );
+	}
+	
 	public List<Macro> getMacros() {
 		List<Macro> ret = new ArrayList<>( macros.values() );
 		Collections.sort( ret );

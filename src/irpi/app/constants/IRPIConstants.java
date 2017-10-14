@@ -82,4 +82,8 @@ public class IRPIConstants {
 	
 	public static final String MACRO_COMMAND = "MACRO_COMMAND";
 	
+	public static final String MACRO_CATEGORY = "MACRO_CATEGORY";
+	
+	public static final String MACRO_REFERENCE = "MACRO_REFERENCE";
+	
 }

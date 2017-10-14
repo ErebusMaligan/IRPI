@@ -11,7 +11,7 @@ ext {
 	jarPathPrefix = "../../libs/"
 	
 	mainClass = "irpi.app.IRPI"
-	iconFile = 'freenas.ico'
+	iconFile = 'ir_icon.ico'
 }
 
 apply from: '../gradle/utilapp.gradle'
