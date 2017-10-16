@@ -30,6 +30,7 @@ public class IRPIUIUtils {
 				b.setBackground( ThemeConstants.BACKGROUND );
 			}
 		});
+		b.setToolTipText( text );
 		return b;
 	}
 

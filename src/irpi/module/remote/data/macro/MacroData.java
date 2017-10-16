@@ -29,10 +29,12 @@ public class MacroData extends MonitorData implements XMLValues {
 		return new ArrayList<>( macros.keySet() );
 	}
 	
-	public void addMacro( Macro macro ) {
+	public void addMacro( Macro macro, boolean notify ) {
 		macros.put( macro.getName(), macro );
-		this.setChanged();
-		this.notifyObservers();
+		if ( notify ) {
+			this.setChanged();
+			this.notifyObservers();
+		}
 	}
 
 	@Override
@@ -46,8 +48,10 @@ public class MacroData extends MonitorData implements XMLValues {
 		e.getChildren( IRPIConstants.MACRO ).forEach( c -> { 
 			Macro m = new Macro( null );
 			m.loadParamsFromXMLValues( c );
-			addMacro( m );
+			addMacro( m, false );
 		} );
+		this.setChanged();
+		this.notifyObservers();
 	}
 
 	@Override

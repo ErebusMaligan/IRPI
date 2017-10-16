@@ -72,7 +72,7 @@ public class MacroManager implements WindowDefinition, Observer {
 		b.addActionListener( e -> {
 			MacroData md = ( (MacroData)this.provider.getMonitorManager().getDataByName( RemoteModule.MACRO_DATA ) );
 			if ( !macroName.getText().isEmpty() && !md.getMacroNames().contains( macroName.getText() ) ) {
-				md.addMacro( new Macro( macroName.getText() ) );
+				md.addMacro( new Macro( macroName.getText() ), true );
 				macroName.setText( "" );
 			} else {
 				JOptionPane.showMessageDialog( provider.getFrame(), "Macro name must be non empty and unique", "Failed to add Macro", JOptionPane.ERROR_MESSAGE );

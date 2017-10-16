@@ -16,7 +16,7 @@ public class RemoteMonitor extends AbstractMonitor {
 
 	public RemoteMonitor( MonitorManager manager, BroadcastManager broadcast, MonitorData data, SSHSession ssh ) {
 		super( manager, broadcast, data, ssh, 1000l );
-		this.queueDelay = 500l;
+		this.queueDelay = 750l;
 		this.printLoopInfoEvery = 1;
 		log = false;
 	}

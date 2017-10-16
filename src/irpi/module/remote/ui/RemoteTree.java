@@ -87,17 +87,16 @@ public class RemoteTree implements WindowDefinition, Observer {
 		for ( String s : cat ) {
 			JPanel macro = new JPanel();
 			macro.setLayout( new WrapLayout() );
-			JScrollPane mScroll = new JScrollPane( macro );
-			UIUtils.setJScrollPane( mScroll );
-			mScroll.getVerticalScrollBar().setUnitIncrement( 15 );
 			UIUtils.setColors( macro );
 			panels.put( s, macro );
-			macros.addTab( s, macro );
+			JScrollPane scroll = new JScrollPane( macro );
+			UIUtils.setJScrollPane( scroll );
+			scroll.getVerticalScrollBar().setUnitIncrement( 15 );
+			macros.addTab( s, scroll );
 		}
 		md.getMacros().forEach( m -> {
 			panels.get( m.getCategory() ).add( IRPIUIUtils.createButton( m.toString(), e -> ((RemoteMonitor)this.provider.getMonitorManager().getMonitorByName( RemoteModule.REMOTE_MONITOR ) ).sendMacro( m ) ) );
 		} );
-		macros.revalidate();
 	}
 	
 	@Override
