@@ -103,7 +103,6 @@ public class RemoteMapData extends MonitorData implements ProcessStreamSiphon, X
 	}
 	
 	private void dataChanged( DATA_TYPES type ) {
-		setChanged();
 		notifyObservers( type );
 	}
 	

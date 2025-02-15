@@ -5,8 +5,6 @@ import java.awt.MouseInfo;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
-import java.util.Observable;
-import java.util.Observer;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
@@ -28,12 +26,14 @@ import irpi.module.remote.RemoteModule;
 import irpi.module.remote.data.macro.Macro;
 import irpi.module.remote.data.macro.MacroChild;
 import irpi.module.remote.data.macro.MacroData;
+import listeners.BasicObservable;
+import listeners.BasicObserver;
 import state.provider.ApplicationProvider;
 import statics.GU;
 import statics.LAFUtils;
 import statics.UIUtils;
 
-public class MacroManager implements WindowDefinition, Observer {
+public class MacroManager implements WindowDefinition, BasicObserver {
 
 	private ApplicationProvider provider;
 	
@@ -155,7 +155,7 @@ public class MacroManager implements WindowDefinition, Observer {
 	}
 
 	@Override
-	public void update( Observable o, Object arg ) {
+	public void update( BasicObservable o, Object arg ) {
 		reload();
 	}
 	

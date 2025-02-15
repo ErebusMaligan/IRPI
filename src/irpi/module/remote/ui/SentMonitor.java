@@ -3,8 +3,6 @@ package irpi.module.remote.ui;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.util.Arrays;
-import java.util.Observable;
-import java.util.Observer;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -16,10 +14,12 @@ import gui.windowmanager.WindowDefinition;
 import irpi.module.remote.RemoteConstants;
 import irpi.module.remote.RemoteModule;
 import irpi.module.remote.data.device.RemoteMapData;
+import listeners.BasicObservable;
+import listeners.BasicObserver;
 import state.provider.ApplicationProvider;
 import statics.UIUtils;
 
-public class SentMonitor implements WindowDefinition, Observer {
+public class SentMonitor implements WindowDefinition, BasicObserver {
 
 	private ApplicationProvider provider;
 	
@@ -64,7 +64,7 @@ public class SentMonitor implements WindowDefinition, Observer {
 	}
 	
 	@Override
-	public void update( Observable o, Object arg ) {
+	public void update( BasicObservable o, Object arg ) {
 		if ( arg.equals( RemoteMapData.DATA_TYPES.LAST_CODE ) ) {
 			RemoteMapData data = (RemoteMapData)provider.getMonitorManager().getDataByName( RemoteModule.REMOTE_DATA );
 			String[] lsc = data.getLastSentCode();

@@ -32,7 +32,6 @@ public class MacroData extends MonitorData implements XMLValues {
 	public void addMacro( Macro macro, boolean notify ) {
 		macros.put( macro.getName(), macro );
 		if ( notify ) {
-			this.setChanged();
 			this.notifyObservers();
 		}
 	}
@@ -50,7 +49,6 @@ public class MacroData extends MonitorData implements XMLValues {
 			m.loadParamsFromXMLValues( c );
 			addMacro( m, false );
 		} );
-		this.setChanged();
 		this.notifyObservers();
 	}
 

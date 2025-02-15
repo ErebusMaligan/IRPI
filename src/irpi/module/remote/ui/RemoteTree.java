@@ -7,8 +7,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.TreeSet;
 
 import javax.swing.BoxLayout;
@@ -28,11 +26,13 @@ import irpi.module.remote.data.device.RemoteMapData.DATA_TYPES;
 import irpi.module.remote.data.device.RemoteMonitor;
 import irpi.module.remote.data.macro.Macro;
 import irpi.module.remote.data.macro.MacroData;
+import listeners.BasicObservable;
+import listeners.BasicObserver;
 import state.provider.ApplicationProvider;
 import statics.GU;
 import statics.UIUtils;
 
-public class RemoteTree implements WindowDefinition, Observer {
+public class RemoteTree implements WindowDefinition, BasicObserver {
 
 	private JTextField file = new JTextField( "/etc/lirc/lircd.conf", 20 );
 	
@@ -110,7 +110,7 @@ public class RemoteTree implements WindowDefinition, Observer {
 	}
 
 	@Override
-	public void update( Observable o, Object arg ) {
+	public void update( BasicObservable o, Object arg ) {
 		MacroData md =  (MacroData)this.provider.getMonitorManager().getDataByName( RemoteModule.MACRO_DATA );
 		if ( o.equals( md ) ) {
 			loadMacros();

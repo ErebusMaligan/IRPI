@@ -22,8 +22,6 @@ import static irpi.app.constants.IRPIConstants.MB_WINDOWS;
 import static irpi.app.constants.IRPIConstants.MB_WINDOW_MANAGEMENT;
 
 import java.awt.Dimension;
-import java.util.Observable;
-import java.util.Observer;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -44,6 +42,8 @@ import irpi.module.remote.data.device.RemoteMapXMLDocumentHandler;
 import irpi.module.remote.data.macro.MacroData;
 import irpi.module.remote.data.macro.MacroXMLDocumentHandler;
 import irpi.module.remote.ui.DefaultFileLocationsDialog;
+import listeners.BasicObservable;
+import listeners.BasicObserver;
 import ssh.SSHConstants;
 import ssh.SSHSession;
 import state.provider.ProviderConstants;
@@ -62,7 +62,7 @@ import xml.XMLValues;
  *
  * Created: Apr 24, 2015, 8:51:30 PM 
  */
-public class IRMenuBar extends GenericMenuBar implements Observer {
+public class IRMenuBar extends GenericMenuBar implements BasicObserver {
 
 	private static final long serialVersionUID = 1L;
 
@@ -195,7 +195,7 @@ public class IRMenuBar extends GenericMenuBar implements Observer {
 	}
 
 	@Override
-	public void update( Observable o, Object arg ) {
+	public void update( BasicObservable o, Object arg ) {
 		boolean c = (Boolean)arg;
 		if ( c ) {
 			enabled( buttonMap.get( MB_SSH_CONNECT ), false );
